@@ -1,22 +1,46 @@
 import streamlit as st
-import replicate
 import os
+import replicate
 from PIL import Image
+import io
 
-# token vem do secrets
+# ====================
+# CONFIGURAÇÃO
+# ====================
+st.set_page_config(page_title="Melhorar Foto com IA", layout="centered")
+
+st.title("✨ Melhorar Foto com IA")
+st.write("Envie uma foto borrada e a IA irá melhorar automaticamente.")
+
+# ====================
+# TOKEN
+# ====================
+if "REPLICATE_API_TOKEN" not in st.secrets:
+    st.error("Token do Replicate não configurado.")
+    st.stop()
+
 os.environ["REPLICATE_API_TOKEN"] = st.secrets["REPLICATE_API_TOKEN"]
 
-st.title("Melhorar Foto com IA")
+# ====================
+# UPLOAD
+# ====================
+uploaded_file = st.file_uploader(
+    "Envie uma imagem (JPG ou PNG)",
+    type=["jpg", "jpeg", "png"]
+)
 
-uploaded = st.file_uploader("Envie uma foto", type=["jpg", "jpeg", "png"])
+if uploaded_file:
+    image = Image.open(uploaded_file)
+    st.image(image, caption="Imagem original", use_column_width=True)
 
-if uploaded:
-    st.image(uploaded, caption="Original", use_column_width=True)
+    if st.button("✨ Melhorar com IA"):
+        with st.spinner("Processando com IA..."):
+            output = replicate.run(
+                "tencentarc/gfpgan",
+                input={
+                    "img": uploaded_file.getvalue()
+                }
+            )
 
-    with st.spinner("Processando com IA..."):
-        output = replicate.run(
-            "tencentarc/gfpgan:latest",
-            input={"img": uploaded.getvalue()}
-        )
-
-    st.image(output, caption="Melhorada", use_column_width=True)
+        st.success("Imagem melhorada!")
+        st.image(output, caption="Imagem melhorada", use_column_width=True)
