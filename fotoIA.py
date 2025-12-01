@@ -3,7 +3,7 @@ import replicate
 import os
 from PIL import Image
 
-# token vindo do Secrets
+# Token do Secrets
 os.environ["REPLICATE_API_TOKEN"] = st.secrets["REPLICATE_API_TOKEN"]
 
 st.set_page_config(page_title="Melhorar Foto com IA")
@@ -24,7 +24,7 @@ if uploaded:
             output = replicate.run(
                 "tencentarc/gfpgan",
                 input={
-                    "img": replicate.File(uploaded)
+                    "img": uploaded
                 }
             )
 
